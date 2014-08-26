@@ -18,12 +18,12 @@ GAME_Update();
 void
 GAME_Render();
 
-struct ball {
+typedef struct Ball {
   uint16_t ballSize ;
   int16_t ballX  ;
   int16_t ballY ;
   int16_t ballVX ;
   int16_t ballVY ;
-};
+} Ball;
 
 #endif

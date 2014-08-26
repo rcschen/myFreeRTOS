@@ -38,6 +38,8 @@ uint8_t ballIsRun = 0;
 
 //Mode
 uint8_t demoMode = 0;
+#define MAX_BALL_NUM  100
+Ball ball[MAX_BALL_NUM];
 
 void
 BallReset()
