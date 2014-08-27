@@ -38,23 +38,40 @@ uint8_t ballIsRun = 0;
 
 //Mode
 uint8_t demoMode = 0;
-#define MAX_BALL_NUM  100
+#define MAX_BALL_NUM  20
 Ball ball[MAX_BALL_NUM];
+
+void
+Ball_Single_Reset( Ball *b, int size )
+{
+
+       b->ballX = player2X;
+       b->ballY = player2Y;
+
+       b->ballVX = 5;
+       b->ballVY = 5;
+       
+       b->ballSize = 5;
+       b->isRun = 1;
+       b->canRun = 0;
+
+}
 
 void
 BallReset()
 {
-	//ballX = ( LCD_PIXEL_WIDTH - 5 ) / 2;
-	//ballY = ( LCD_PIXEL_HEIGHT - 5 ) / 2;
-
-	ballX = player2X;
-	ballY = player2Y;
-
-	ballVX = 5;
-	ballVY = 5;
-
-	ballIsRun = 1;
+    ballX = player2X;
+    ballY = player2Y;
+    ballVX = 5;
+    ballVY = 5;
+    ballIsRun = 1;
+    int i = 0;
+    for(; i < MAX_BALL_NUM; i++) {
+        Ball_Single_Reset( &ball[i],i );
+    }
 }
+
+
 
 void
 GAME_EventHandler1()
@@ -88,6 +105,13 @@ GAME_EventHandler3()
 	if( ballIsRun == 0 ){
 		BallReset();
 	}
+        int i = 0;
+        for(; i < MAX_BALL_NUM; i++) {
+            if( ball[i].isRun == 0 ) {
+               Ball_Single_Reset( &ball[i],i );
+            }
+        }
+
 }
 void
 PLAYER_Clear(){
@@ -114,8 +138,20 @@ PLAYER1_Reversed(){
 void
 PLAYER2_Reversed() 
 {
- 	if( player2IsReversed )
+ 	if( player2IsReversed ) {
 		player2X -= 5;
+                int i = 0;
+                for(;i< MAX_BALL_NUM; i++){
+                    if ( ball[i].isRun == 1 && ball[i].canRun == 0) {
+                       ball[i].ballX = player2X;
+                       ball[i].ballY = player2Y;
+
+                       ball[i].canRun = 1 ;
+                       break;
+                      
+                    }
+                }
+        }
         else
 		player2X += 5;
 
@@ -125,12 +161,12 @@ PLAYER2_Reversed()
 	else if( player2X + player2W >= LCD_PIXEL_WIDTH )
 		player2X = LCD_PIXEL_WIDTH - player2W;
 
+
 }
 
 void
 BALL_Check_Touch_Wall()
 {
-	//ballX += ballVX;
 	if( ballX <= 0 ){
 		ballX = 0;
 		ballVX *= -1;
@@ -139,6 +175,19 @@ BALL_Check_Touch_Wall()
 		ballX = LCD_PIXEL_WIDTH - ballSize;
 		ballVX *= -1;
 	}
+    int i = 0;
+    for(; i < MAX_BALL_NUM; i++) {
+
+	if( ball[i].ballX <= 0 ){
+		ball[i].ballX = 0;
+		ball[i].ballVX *= -1;
+	}
+	else if( ballX + ballSize >= LCD_PIXEL_WIDTH ){
+		ball[i].ballX = LCD_PIXEL_WIDTH - ballSize;
+		ball[i].ballVX *= -1;
+	}
+    }
+        
 
 }
 
@@ -149,28 +198,47 @@ BALL_Check_Player2_Loss()
 		if( ballX + ballSize >= player2X && ballX <= player2X + player2W ){
 			if( ballX - ballSize <= player2Y + player2W/4 ){
 				ballVY =-3;
-				//ballVX =-7;
 			}
 			else if( ballX >= player2Y + player2W - player2W/4 ){
 				ballVY =-3;
-				//ballVX = 7;
 			}
 			else if( ballX + ballSize < player2Y + player2W/2 ){
 				ballVY =-3;
-				//ballVX =-3;
 			}
 			else if( ballX > player2Y + player2W/2 ){
 				ballVY =-3;
-				//ballVX = 3;
 			}
 			else{
 				ballVY =-3;
-				//ballVX = 0;
 			}
 		}
 		else
 			BallReset();
 	}
+    int i = 0;
+    for(; i < MAX_BALL_NUM; i++) {
+	if( ball[i].ballY + ball[i].ballSize >= player2Y ){
+           if( ball[i].ballX + ball[i].ballSize >= player2X && ball[i].ballX <= player2X + player2W ){
+		if( ball[i].ballX - ball[i].ballSize <= player2Y + player2W/4 ){
+			ball[i].ballVY =-3;
+		}
+		else if( ball[i].ballX >= player2Y + player2W - player2W/4 ){
+			ball[i].ballVY =-3;
+		}
+		else if( ball[i].ballX + ball[i].ballSize < player2Y + player2W/2 ){
+			ball[i].ballVY =-3;
+		}
+		else if( ball[i].ballX > player2Y + player2W/2 ){
+			ball[i].ballVY =-3;
+		}
+		else{
+			ball[i].ballVY =-3;
+		}
+           }
+           else
+		BallReset();
+        }
+   }
 
 }
 
@@ -203,8 +271,49 @@ BALL_Check_Player1_Loss()
 			else
 				BallReset();
 	}
+    int i = 0;
+    for(; i < MAX_BALL_NUM; i++) {
 
+	if( ball[i].ballY <= player1Y + player1H ){
+           if( ball[i].ballX + ball[i].ballSize >= player1X && ball[i].ballX <= player1X + player1W ){
+		if( ball[i].ballX - ball[i].ballSize <= player1Y + player1W/4 ){
+			ball[i].ballVY = 3;
+			ball[i].ballVX =-7;
+	 	}
+		else if( ball[i].ballX >= player1Y + player1W - player1W/4 ){
+			ball[i].ballVY = 3;
+			ball[i].ballVX = 7;
+		}
+		else if( ball[i].ballX + ballSize < player1Y + player1W/2 ){
+			ball[i].ballVY = 7;
+			ball[i].ballVX =-3;
+		}
+		else if( ball[i].ballX > player1Y + player1W/2 ){
+			ball[i].ballVY = 7;
+			ball[i].ballVX = 3;
+		}
+		else{
+			ball[i].ballVY = 9;
+			ball[i].ballVX = 0;
+		}
+          }
+          else
+		BallReset();
+      }
+   }
 }
+
+void
+DrawBalls( int16_t color ){
+   int i = 0;
+   for(; i < MAX_BALL_NUM; i++) {
+       if (ball[i].isRun == 1) {
+         LCD_SetTextColor( color );
+         LCD_DrawFullRect( ball[i].ballX, ball[i].ballY, ball[i].ballSize, ball[i].ballSize );
+       }
+   }
+}
+
 void
 GAME_Update()
 {
@@ -227,6 +336,22 @@ GAME_Update()
                 BALL_Check_Player1_Loss();
 
 	}
+        int i = 0;
+        for(;i < MAX_BALL_NUM; i++ ){
+            if( ball[i].isRun == 1 ){
+
+                DrawBalls(LCD_COLOR_BLACK);
+		//Touch wall
+                BALL_Check_Touch_Wall();
+
+		//PONG!
+                ball[i].ballY += ball[i].ballVY;
+                BALL_Check_Player2_Loss();
+                BALL_Check_Player1_Loss();
+           }
+
+	}
+
 }
 
 void
@@ -237,6 +362,7 @@ GAME_Render()
 	LCD_DrawFullRect( player2X, player2Y, player2W, player2H );
 	LCD_SetTextColor( LCD_COLOR_YELLOW );
 	LCD_DrawFullRect( ballX, ballY, ballSize, ballSize );
+        DrawBalls(LCD_COLOR_BLUE);
 	LCD_SetTextColor( LCD_COLOR_RED );
 	LCD_DrawLine( 10, LCD_PIXEL_HEIGHT / 2, LCD_PIXEL_WIDTH - 20, LCD_DIR_HORIZONTAL );
 }

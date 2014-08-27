@@ -20,6 +20,8 @@ GAME_Render();
 
 typedef struct Ball {
   uint16_t ballSize ;
+  uint16_t isRun;
+  uint16_t canRun;
   int16_t ballX  ;
   int16_t ballY ;
   int16_t ballVX ;
