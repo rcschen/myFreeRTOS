@@ -52,7 +52,6 @@ OBJS += $(PWD)/CORTEX_M4F_STM32F407ZG-SK/startup_stm32f429_439xx.o
 # STM32F4xx_StdPeriph_Driver
 CFLAGS += -DUSE_STDPERIPH_DRIVER
 CFLAGS += -D"assert_param(expr)=((void)0)"
-
 #My restart
 OBJS += \
       $(PWD)/CORTEX_M4F_STM32F407ZG-SK/main.o \
@@ -69,6 +68,7 @@ OBJS += \
       $(PWD)/portable/GCC/ARM_CM4F/port.o \
       $(PWD)/portable/MemMang/heap_1.o \
 
+CFLAGS += -DUSE_DEFAULT_TIMEOUT_CALLBACK
 OBJS += \
     $(PWD)/CORTEX_M4F_STM32F407ZG-SK/Libraries/STM32F4xx_StdPeriph_Driver/src/misc.o \
     $(PWD)/CORTEX_M4F_STM32F407ZG-SK/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_gpio.o \
@@ -85,7 +85,9 @@ OBJS += \
     $(PWD)/Utilities/STM32F429I-Discovery/stm32f429i_discovery.o \
     $(PWD)/Utilities/STM32F429I-Discovery/stm32f429i_discovery_sdram.o \
     $(PWD)/Utilities/STM32F429I-Discovery/stm32f429i_discovery_lcd.o \
-    $(PWD)/Utilities/STM32F429I-Discovery/stm32f429i_discovery_ioe.o
+    $(PWD)/Utilities/STM32F429I-Discovery/stm32f429i_discovery_ioe.o \
+    $(PWD)/Utilities/STM32F429I-Discovery/stm32f429i_discovery_l3gd20.o
+
 
 #Game
 OBJS += $(PWD)/CORTEX_M4F_STM32F407ZG-SK/game/game.o
