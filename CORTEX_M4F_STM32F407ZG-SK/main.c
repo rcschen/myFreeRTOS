@@ -54,8 +54,8 @@ int main(void)
   //STM_EVAL_LEDInit(LED6);
 
   /* Turn OFF all LEDs */
-  STM_EVAL_LEDOff(LED4);
-  STM_EVAL_LEDOff(LED3);
+  //STM_EVAL_LEDOff(LED4);
+  //STM_EVAL_LEDOff(LED3);
   //STM_EVAL_LEDOn(LED5);
   //STM_EVAL_LEDOn(LED6);
     
@@ -64,15 +64,15 @@ int main(void)
   /* Create a task to flash the LED. */
   xTaskCreate(LED_task,
              (signed portCHAR *) "LED Flash",
-             512 /* stack size */, NULL,
-             tskIDLE_PRIORITY + 5, NULL);
+             128 /* stack size */, NULL,
+             tskIDLE_PRIORITY + 2, NULL);
 
   /* Create a task to button check. */
   
   xTaskCreate(button_task,
              (signed portCHAR *) "User Button",
-             512 /* stack size */, NULL,
-             tskIDLE_PRIORITY + 5, NULL);
+             128 /* stack size */, NULL,
+             tskIDLE_PRIORITY + 1, NULL);
   STM_EVAL_LEDOn(LED3);
   /* Start running the tasks. */
   vTaskStartScheduler(); 
@@ -103,10 +103,10 @@ static void button_task(void *pvParameters)
     		    if (UserButtonPressed == 0x01)
     		    {
       		    	/* Toggle LED4 */
-      			STM_EVAL_LEDToggle(LED4);
+      			STM_EVAL_LEDOn(LED4);
       			vTaskDelay(100);
       			/* Toggle LED3 */
-      			STM_EVAL_LEDToggle(LED3);
+      			STM_EVAL_LEDOn(LED3);
       			vTaskDelay(100);
     		    }
 		    /* Waiting User Button is Released */
