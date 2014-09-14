@@ -82,6 +82,7 @@ OBJS += \
     $(PWD)/CORTEX_M4F_STM32F407ZG-SK/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_dma2d.o \
     $(PWD)/CORTEX_M4F_STM32F407ZG-SK/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_ltdc.o \
     $(PWD)/CORTEX_M4F_STM32F407ZG-SK/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_fmc.o \
+    $(PWD)/CORTEX_M4F_STM32F407ZG-SK/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_flash.o \
     $(PWD)/Utilities/STM32F429I-Discovery/stm32f429i_discovery.o \
     $(PWD)/Utilities/STM32F429I-Discovery/stm32f429i_discovery_sdram.o \
     $(PWD)/Utilities/STM32F429I-Discovery/stm32f429i_discovery_lcd.o \
@@ -90,8 +91,8 @@ OBJS += \
 
 
 #Game
-OBJS += $(PWD)/CORTEX_M4F_STM32F407ZG-SK/game/game.o
-CFLAGS += -I $(PWD)/CORTEX_M4F_STM32F407ZG-SK/game
+#OBJS += $(PWD)/CORTEX_M4F_STM32F407ZG-SK/game/game.o
+#CFLAGS += -I $(PWD)/CORTEX_M4F_STM32F407ZG-SK/game
 
 CFLAGS += -DUSE_STDPERIPH_DRIVER
 CFLAGS += -I $(PWD)/CORTEX_M4F_STM32F407ZG-SK \

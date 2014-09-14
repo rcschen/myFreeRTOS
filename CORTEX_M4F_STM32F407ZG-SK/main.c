@@ -1,113 +1,144 @@
-/**
-  ******************************************************************************
-  * @file    Template/main.c 
-  * @author  MCD Application Team
-  * @version V1.0.0
-  * @date    20-September-2013
-  * @brief   Main program body
-  ******************************************************************************
-  * @attention
-  *
-  * <h2><center>&copy; COPYRIGHT 2013 STMicroelectronics</center></h2>
-  *
-  * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
-  * You may not use this file except in compliance with the License.
-  * You may obtain a copy of the License at:
-  *
-  *        http://www.st.com/software_license_agreement_liberty_v2
-  *
-  * Unless required by applicable law or agreed to in writing, software 
-  * distributed under the License is distributed on an "AS IS" BASIS, 
-  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  * See the License for the specific language governing permissions and
-  * limitations under the License.
-  *
-  ******************************************************************************
-  */
 
 /* Includes ------------------------------------------------------------------*/
-#include "main.h"
-#include "game.h"
 
+//#include "FreeRTOSConfig.h"
 #include "FreeRTOS.h"
 #include "task.h"
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-/** @addtogroup Template
-  * @{
-  */ 
+
+#include "main.h"
+#include "stm32f4xx_conf.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
+#define TESTRESULT_ADDRESS         0x080FFFFC
+#define ALLTEST_PASS               0x00000000
+#define ALLTEST_FAIL               0x55555555
+
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
-extern uint8_t demoMode;
 
-void
-prvInit()
+uint16_t PrescalerValue = 0;
+
+__IO uint32_t TimingDelay;
+__IO uint8_t UserButtonPressed = 0x00;
+
+
+/* Private function prototypes -----------------------------------------------*/
+static void LED_task(void *pvParameters);
+static void button_task(void *pvParameters);
+
+/**
+  * @brief  This function handles EXTI0_IRQ Handler.
+  * @param  None
+  * @retval None
+  */
+void EXTI0_IRQHandler(void)
 {
-	//LCD init
-	LCD_Init();
-	IOE_Config();
-	LTDC_Cmd( ENABLE );
-
-	LCD_LayerInit();
-	LCD_SetLayer( LCD_FOREGROUND_LAYER );
-	LCD_Clear( LCD_COLOR_BLACK );
-	LCD_SetTextColor( LCD_COLOR_WHITE );
-
-	//Button
-	STM_EVAL_PBInit( BUTTON_USER, BUTTON_MODE_GPIO );
-
-	//LED
-	STM_EVAL_LEDInit( LED3 );
+  UserButtonPressed = 0x01;
+  
+  /* Clear the EXTI line pending bit */
+  EXTI_ClearITPendingBit(USER_BUTTON_EXTI_LINE);
 }
 
-static void GameEventTask1( void *pvParameters )
-{
-	while( 1 ){
-		GAME_EventHandler1();
-	}
-}
-
-static void GameEventTask2( void *pvParameters )
-{
-	while( 1 ){
-		GAME_EventHandler2();
-	}
-}
-
-static void GameEventTask3( void *pvParameters )
-{
-	while( 1 ){
-		GAME_EventHandler3();
-	}
-}
-
-static void GameTask( void *pvParameters )
-{
-	while( 1 ){
-		GAME_Update();
-		GAME_Render();
-		vTaskDelay( 10 );
-	}
-}
-
-//Main Function
 int main(void)
 {
-	prvInit();
+  RCC_ClocksTypeDef RCC_Clocks;
+  
+  /* Initialize LEDs and User_Button on STM32F4-Discovery --------------------*/
+  STM_EVAL_PBInit(BUTTON_USER, BUTTON_MODE_EXTI); 
 
-	if( STM_EVAL_PBGetState( BUTTON_USER ) )
-		demoMode = 1;
+  /* Initialize LEDs to be managed by GPIO */
+  STM_EVAL_LEDInit(LED4);
+  STM_EVAL_LEDInit(LED3);
+  //STM_EVAL_LEDInit(LED5);
+  //STM_EVAL_LEDInit(LED6);
 
-	xTaskCreate( GameTask, (signed char*) "GameTask", 128, NULL, tskIDLE_PRIORITY + 1, NULL );
-	xTaskCreate( GameEventTask1, (signed char*) "GameEventTask1", 128, NULL, tskIDLE_PRIORITY + 1, NULL );
-	xTaskCreate( GameEventTask2, (signed char*) "GameEventTask2", 128, NULL, tskIDLE_PRIORITY + 1, NULL );
-	xTaskCreate( GameEventTask3, (signed char*) "GameEventTask3", 128, NULL, tskIDLE_PRIORITY + 1, NULL );
+  /* Turn OFF all LEDs */
+  STM_EVAL_LEDOff(LED4);
+  STM_EVAL_LEDOff(LED3);
+  //STM_EVAL_LEDOn(LED5);
+  //STM_EVAL_LEDOn(LED6);
+    
+  /* Reset UserButton_Pressed variable */
+  UserButtonPressed = 0x00;
+  /* Create a task to flash the LED. */
+  xTaskCreate(LED_task,
+             (signed portCHAR *) "LED Flash",
+             512 /* stack size */, NULL,
+             tskIDLE_PRIORITY + 5, NULL);
 
-	//Call Scheduler
-	vTaskStartScheduler();
+  /* Create a task to button check. */
+  
+  xTaskCreate(button_task,
+             (signed portCHAR *) "User Button",
+             512 /* stack size */, NULL,
+             tskIDLE_PRIORITY + 5, NULL);
+  STM_EVAL_LEDOn(LED3);
+  /* Start running the tasks. */
+  vTaskStartScheduler(); 
+
+  return 0;
 }
+
+static void LED_task(void *pvParameters)
+{
+  RCC_ClocksTypeDef RCC_Clocks;
+  uint8_t togglecounter = 0x00;
+
+  while(1)
+  {   /* Toggle LED5 */
+      STM_EVAL_LEDToggle(LED3);
+      vTaskDelay(100);
+      /* Toggle LED6 */
+      STM_EVAL_LEDToggle(LED4);
+      vTaskDelay(100);
+  }
+}
+
+static void button_task(void *pvParameters)
+{
+	while (1)
+	{
+		    /* Waiting User Button is pressed */
+    		    if (UserButtonPressed == 0x01)
+    		    {
+      		    	/* Toggle LED4 */
+      			STM_EVAL_LEDToggle(LED4);
+      			vTaskDelay(100);
+      			/* Toggle LED3 */
+      			STM_EVAL_LEDToggle(LED3);
+      			vTaskDelay(100);
+    		    }
+		    /* Waiting User Button is Released */
+    		    while (STM_EVAL_PBGetState(BUTTON_USER) == Bit_SET);
+		    UserButtonPressed = 0x00;
+	}
+}
+
+
+/**
+  * @brief  This function handles the test program fail.
+  * @param  None
+  * @retval None
+  */
+void Fail_Handler(void)
+{
+  /* Erase last sector */ 
+  FLASH_EraseSector(FLASH_Sector_11, VoltageRange_3);
+  /* Write FAIL code at last word in the flash memory */
+  FLASH_ProgramWord(TESTRESULT_ADDRESS, ALLTEST_FAIL);
+  
+  while(1)
+  {
+    /* Toggle Red LED */
+    STM_EVAL_LEDToggle(LED3);
+    vTaskDelay(5);
+  }
+}
+
+
+void vApplicationTickHook()
+{
+}
+
+
