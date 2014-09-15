@@ -52,9 +52,11 @@ int main(void)
   STM_EVAL_LEDInit(LED3);
   
   /* Turn OFF all LEDs */
-  STM_EVAL_LEDOff(LED4);
-  STM_EVAL_LEDOff(LED3);
-     
+  //STM_EVAL_LEDOff(LED4);
+  //STM_EVAL_LEDOff(LED3);
+  //STM_EVAL_LEDOn(LED5);
+  //STM_EVAL_LEDOn(LED6);
+    
   /* Reset UserButton_Pressed variable */
   UserButtonPressed = 0x00;
   /* Create a task to flash the LED. */
